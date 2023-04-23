@@ -37,12 +37,47 @@ var server = http.createServer(function(req, res){
         buffer += decoder.write(data);
     })
 
-    req.on('end', function(end){
-        res.end('Hello World, you\'re in path: ' +trimmedUrl + " " + "with method: " + method);
+    req.on('end', function(){
+        buffer += decoder.end();
 
-        // Out the path received
-        console.log("The  request payloads are: ",buffer);
-    })
+        // choose a path from trimpath if not found, just 
+        var choosenPath = typeof routes[trimmedUrl] !== "undefined" ? routes[trimmedUrl] : handler.notFound;
+    
+        // pass the data on the request
+        var data = {
+            'trimmedurl' : trimmedUrl,
+            'headers':headers,
+            'querySetSelector': querySetSelector,
+            'method': method,
+            'payload':buffer
+        };
+    
+        // handler function for chosenpath
+        choosenPath(data,function(statusCode, Payload) {
+            // get the status code or route to undefined
+            statusCode = typeof(statusCode) == 'number' ? statusCode : 200;
+
+            // get the paylaod 
+            Payload = typeof(Payload) == 'object' ? Payload : {};
+
+            // convert the payload to string
+            var payloadString = JSON.stringify(Payload);
+
+            //  return response
+            res.writeHead(statusCode);
+            res.end(payloadString);
+
+            // output to the user as text
+                // Out the path received
+            console.log("Returning this response: ",statusCode, payloadString);
+        });
+        // req.on('end', function(end){
+        
+        // });
+
+    });
+
+    
   
     
 })
@@ -70,4 +105,4 @@ handler.notFound= function(data, callback){
 // Define the route 
 var routes = {
     'sample': handler.sample
-}
+};
