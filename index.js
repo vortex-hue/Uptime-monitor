@@ -7,6 +7,8 @@
 var http = require('http');
 const url = require('url');
 const stringDecoder = require('string_decoder').StringDecoder;
+var config = require('./config');
+
 
 // Create a server object that listens on a port
 var server = http.createServer(function(req, res){
@@ -64,6 +66,9 @@ var server = http.createServer(function(req, res){
             var payloadString = JSON.stringify(Payload);
 
             //  return response
+
+            //set content type to json
+            res.setHeader('Content-Type', 'application/json');
             res.writeHead(statusCode);
             res.end(payloadString);
 
@@ -83,8 +88,11 @@ var server = http.createServer(function(req, res){
 })
 
 // Alert us that server is running
-server.listen(3000, function(){
-    console.log("The server is listening on port 3000")
+server.listen(config.port, function(){
+    port = config.port;
+    envName = config.envName;
+    // console.log(port);
+    console.log("The server is listening on port "+ port + " in " + envName + " Mode ")
 });
 
 // Handler function
@@ -101,8 +109,12 @@ handler.notFound= function(data, callback){
     callback(404);
 };
 
-
+// home handler
+handler.home = function(data, callback){
+    callback(200, {'name': 'Hello world!!, you\'re in hoome page'});
+}
 // Define the route 
 var routes = {
-    'sample': handler.sample
+    'sample': handler.sample,
+    '': handler.home,
 };
