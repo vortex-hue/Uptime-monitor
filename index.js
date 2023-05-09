@@ -5,95 +5,121 @@
 
 // Dependencies
 var http = require('http');
+var https = require('https');
+var fs = require('fs');
 const url = require('url');
 const stringDecoder = require('string_decoder').StringDecoder;
 var config = require('./config');
 
 
-// Create a server object that listens on a port
-var server = http.createServer(function(req, res){
-
-    // Get and parse the url
-    var parsedUrl = url.parse(req.url, true);
-
-    // Get the path and Trim the url using regex
-    var path = parsedUrl.pathname;
-    var trimmedUrl = path.replace(/^\/+|\/+$/g,'');
-
-    // Get the request method
-    var method = req.method.toUpperCase();
-
-    // Get requests headers
-    var headers = req.headers;
-    // Get the querySetSelector
-
-    var querySetSelector = parsedUrl.query;
-    // Log a message to the user
-
-    //  Payload if any
-    var decoder = new stringDecoder;
-    var buffer = '';
-
-    // on emit function
-    req.on('data', function(data){
-        buffer += decoder.write(data);
-    })
-
-    req.on('end', function(){
-        buffer += decoder.end();
-
-        // choose a path from trimpath if not found, just 
-        var choosenPath = typeof routes[trimmedUrl] !== "undefined" ? routes[trimmedUrl] : handler.notFound;
-    
-        // pass the data on the request
-        var data = {
-            'trimmedurl' : trimmedUrl,
-            'headers':headers,
-            'querySetSelector': querySetSelector,
-            'method': method,
-            'payload':buffer
-        };
-    
-        // handler function for chosenpath
-        choosenPath(data,function(statusCode, Payload) {
-            // get the status code or route to undefined
-            statusCode = typeof(statusCode) == 'number' ? statusCode : 200;
-
-            // get the paylaod 
-            Payload = typeof(Payload) == 'object' ? Payload : {};
-
-            // convert the payload to string
-            var payloadString = JSON.stringify(Payload);
-
-            //  return response
-
-            //set content type to json
-            res.setHeader('Content-Type', 'application/json');
-            res.writeHead(statusCode);
-            res.end(payloadString);
-
-            // output to the user as text
-                // Out the path received
-            console.log("Returning this response: ",statusCode, payloadString);
-        });
-        // req.on('end', function(end){
-        
-        // });
-
-    });
-
-    
-  
+// Create a http server object that listens on a port
+var Httpserver = http.createServer(function(req, res){
+    uniFiedServer(req, res);
     
 })
 
 // Alert us that server is running
-server.listen(config.port, function(){
-    port = config.port;
+Httpserver.listen(config.Httpport, function(){
+    port = config.Httpport;
     envName = config.envName;
     // console.log(port);
     console.log("The server is listening on port "+ port + " in " + envName + " Mode ")
 });
+
+
+// Server options
+HttpsServerOption = {
+    'key': fs.readFileSync('./https/key.pem'),
+    'cert': fs.readFileSync('./https/cert.pem')
+}
+// Instantiate HTTPS Server
+var Httpsserver = http.createServer(HttpsServerOption,function(req, res){
+    uniFiedServer(req, res);
+    
+})
+
+// Start a https server 
+Httpsserver.listen(config.Httpsport, function(){
+    port = config.Httpsport;
+    envName = config.envName;
+    // console.log(port);
+    console.log("The server is listening on port "+ port + " in " + envName + " Mode ")
+});
+
+
+// Unified Server Function
+var uniFiedServer = function(req,res){
+
+     // Get and parse the url
+     var parsedUrl = url.parse(req.url, true);
+
+     // Get the path and Trim the url using regex
+     var path = parsedUrl.pathname;
+     var trimmedUrl = path.replace(/^\/+|\/+$/g,'');
+ 
+     // Get the request method
+     var method = req.method.toUpperCase();
+ 
+     // Get requests headers
+     var headers = req.headers;
+     // Get the querySetSelector
+ 
+     var querySetSelector = parsedUrl.query;
+     // Log a message to the user
+ 
+     //  Payload if any
+     var decoder = new stringDecoder;
+     var buffer = '';
+ 
+     // on emit function
+     req.on('data', function(data){
+         buffer += decoder.write(data);
+     })
+ 
+     req.on('end', function(){
+         buffer += decoder.end();
+ 
+         // choose a path from trimpath if not found, just 
+         var choosenPath = typeof routes[trimmedUrl] !== "undefined" ? routes[trimmedUrl] : handler.notFound;
+     
+         // pass the data on the request
+         var data = {
+             'trimmedurl' : trimmedUrl,
+             'headers':headers,
+             'querySetSelector': querySetSelector,
+             'method': method,
+             'payload':buffer
+         };
+     
+         // handler function for chosenpath
+         choosenPath(data,function(statusCode, Payload) {
+             // get the status code or route to undefined
+             statusCode = typeof(statusCode) == 'number' ? statusCode : 200;
+ 
+             // get the paylaod 
+             Payload = typeof(Payload) == 'object' ? Payload : {};
+ 
+             // convert the payload to string
+             var payloadString = JSON.stringify(Payload);
+ 
+             //  return response
+ 
+             //set content type to json
+             res.setHeader('Content-Type', 'application/json');
+             res.writeHead(statusCode);
+             res.end(payloadString);
+ 
+             // output to the user as text
+                 // Out the path received
+             console.log("Returning this response: ",statusCode, payloadString);
+         });
+         // req.on('end', function(end){
+         
+         // });
+ 
+     });
+};
+
 
 // Handler function
 var handler = {};

@@ -14,14 +14,16 @@ environments.staging = {
 
 // developemt environments settings
 environments.dev = {
-    'port': 7000,
+    'Httpport': 3000,
+    'Httpsport':3001,
     'envName': 'development'
 };
 
 
 //production environments settings
 environments.production = {
-    'port': 5000,
+    'Httpport': 5000,
+    'Httpsport':5001,
     'envName': 'production'
 };
 

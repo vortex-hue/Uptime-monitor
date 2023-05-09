@@ -28,3 +28,9 @@ curl localhost:3000/sample
 ```
 
     Do make sure to have `curl` available on your machine
+
+    To Generate ssl certs
+
+`
+openssl req -newkey rsa:2048 -new -nodes -x509 -days 3650 -keyout key.pem -out cert.pem
+`
