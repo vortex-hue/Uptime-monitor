@@ -19,8 +19,8 @@ var Httpserver = http.createServer(function(req, res){
 })
 
 // Alert us that server is running
-Httpserver.listen(config.Httpport, function(){
-    port = config.Httpport;
+Httpserver.listen(config.httpport, function(){
+    port = config.httpport;
     envName = config.envName;
     // console.log(port);
     console.log("The server is listening on port "+ port + " in " + envName + " Mode ")
@@ -33,14 +33,14 @@ HttpsServerOption = {
     'cert': fs.readFileSync('./https/cert.pem')
 }
 // Instantiate HTTPS Server
-var Httpsserver = http.createServer(HttpsServerOption,function(req, res){
+var Httpsserver = https.createServer(HttpsServerOption,function(req, res){
     uniFiedServer(req, res);
     
 })
 
 // Start a https server 
-Httpsserver.listen(config.Httpsport, function(){
-    port = config.Httpsport;
+Httpsserver.listen(config.httpsport, function(){
+    port = config.httpsport;
     envName = config.envName;
     // console.log(port);
     console.log("The server is listening on port "+ port + " in " + envName + " Mode ")
@@ -125,10 +125,17 @@ var uniFiedServer = function(req,res){
 var handler = {};
 
 // Sample handler
-handler.sample = function(data, callback){
-// callback a status code and a payload
-    callback(200, {'name': "Hello world of sample test feactures"});
+// handler.sample = function(data, callback){
+// // callback a status code and a payload
+//     callback(200, {'name': "Hello world of sample test feactures"});
+// };
+//
+
+// Ping handler to check uptime
+handler.ping = function(data, callback){
+    callback(200);
 };
+
 
 // Not found handler
 handler.notFound= function(data, callback){
@@ -141,6 +148,6 @@ handler.home = function(data, callback){
 }
 // Define the route 
 var routes = {
-    'sample': handler.sample,
+    'ping': handler.ping,
     '': handler.home,
 };
